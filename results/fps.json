@@ -2,212 +2,212 @@
  "gpu": "NVIDIA GeForce RTX 2080 Ti",
  "db/drjohnson": {
   "scaffold": {
-   "fps": 142.3959380905857,
+   "fps": 140.96935710728323,
    "anchors": 195086
   },
   "scgc": {
-   "fps": 133.18142049757154,
-   "anchors": 221120
+   "fps": 130.60876764103074,
+   "anchors": 221378
   }
  },
  "db/playroom": {
   "scaffold": {
-   "fps": 155.72399165783645,
+   "fps": 153.73628460709463,
    "anchors": 159292
   },
   "scgc": {
-   "fps": 158.91542005158047,
-   "anchors": 180871
+   "fps": 151.1076598930623,
+   "anchors": 180455
   }
  },
  "mipnerf360/bicycle": {
   "scaffold": {
-   "fps": 61.512926457734075,
+   "fps": 60.769623224735106,
    "anchors": 989620
   },
   "scgc": {
-   "fps": 54.160221025865376,
-   "anchors": 1091740
+   "fps": 53.50513606974707,
+   "anchors": 1086810
   }
  },
  "mipnerf360/bonsai": {
   "scaffold": {
-   "fps": 74.04455768193941,
+   "fps": 73.62885135145821,
    "anchors": 415620
   },
   "scgc": {
-   "fps": 74.56100989763486,
-   "anchors": 428413
+   "fps": 74.7906958811825,
+   "anchors": 424009
   }
  },
  "mipnerf360/counter": {
   "scaffold": {
-   "fps": 70.70208869391732,
+   "fps": 70.7112402792204,
    "anchors": 281979
   },
   "scgc": {
-   "fps": 69.98652320339507,
-   "anchors": 298698
+   "fps": 70.07951274264568,
+   "anchors": 300125
   }
  },
  "mipnerf360/flowers": {
   "scaffold": {
-   "fps": 86.33223857686441,
+   "fps": 87.08056454002622,
    "anchors": 727559
   },
   "scgc": {
-   "fps": 78.179365378815,
-   "anchors": 805908
+   "fps": 75.56559782123574,
+   "anchors": 828734
   }
  },
  "mipnerf360/garden": {
   "scaffold": {
-   "fps": 58.38487866075297,
+   "fps": 58.76707376876912,
    "anchors": 731674
   },
   "scgc": {
-   "fps": 55.44775709984566,
-   "anchors": 771727
+   "fps": 55.30957420641382,
+   "anchors": 779081
   }
  },
  "mipnerf360/kitchen": {
   "scaffold": {
-   "fps": 56.01408842301696,
+   "fps": 56.14713749652429,
    "anchors": 340427
   },
   "scgc": {
-   "fps": 47.61707732973158,
-   "anchors": 394866
+   "fps": 53.01585593328988,
+   "anchors": 360100
   }
  },
  "mipnerf360/room": {
   "scaffold": {
-   "fps": 98.19032974447249,
+   "fps": 97.95266936199388,
    "anchors": 281318
   },
   "scgc": {
-   "fps": 95.72773126750882,
-   "anchors": 296336
+   "fps": 94.89608612811584,
+   "anchors": 300882
   }
  },
  "mipnerf360/stump": {
   "scaffold": {
-   "fps": 88.00985510236734,
+   "fps": 86.4956167164964,
    "anchors": 827733
   },
   "scgc": {
-   "fps": 75.99148313291167,
-   "anchors": 905338
+   "fps": 74.86689620832337,
+   "anchors": 898495
   }
  },
  "mipnerf360/treehill": {
   "scaffold": {
-   "fps": 80.80671563753282,
+   "fps": 78.80573683221644,
    "anchors": 773142
   },
   "scgc": {
-   "fps": 73.18856785372913,
-   "anchors": 848569
+   "fps": 70.40290647849655,
+   "anchors": 856717
   }
  },
  "nerf_synthetic/chair": {
   "scaffold": {
-   "fps": 158.80917151781827,
+   "fps": 158.82471664616602,
    "anchors": 41581
   },
   "scgc": {
-   "fps": 161.06628340567906,
-   "anchors": 41704
+   "fps": 160.72913776638714,
+   "anchors": 41080
   }
  },
  "nerf_synthetic/drums": {
   "scaffold": {
-   "fps": 137.16904248678105,
+   "fps": 136.83537039086113,
    "anchors": 67521
   },
   "scgc": {
-   "fps": 133.99204252293777,
-   "anchors": 72733
+   "fps": 136.4019118081705,
+   "anchors": 69071
   }
  },
  "nerf_synthetic/ficus": {
   "scaffold": {
-   "fps": 158.65332732069623,
+   "fps": 158.49592200479913,
    "anchors": 43134
   },
   "scgc": {
-   "fps": 157.93523743920963,
-   "anchors": 43463
+   "fps": 159.75263116632743,
+   "anchors": 41267
   }
  },
  "nerf_synthetic/hotdog": {
   "scaffold": {
-   "fps": 174.66971569226737,
+   "fps": 174.5314851702682,
    "anchors": 25654
   },
   "scgc": {
-   "fps": 172.87033672376617,
-   "anchors": 28360
+   "fps": 172.75604521673634,
+   "anchors": 28066
   }
  },
  "nerf_synthetic/lego": {
   "scaffold": {
-   "fps": 147.96629877289303,
+   "fps": 147.63287109986848,
    "anchors": 54349
   },
   "scgc": {
-   "fps": 146.21247716031377,
-   "anchors": 56382
+   "fps": 148.34916920406278,
+   "anchors": 53811
   }
  },
  "nerf_synthetic/materials": {
   "scaffold": {
-   "fps": 135.20620433514975,
+   "fps": 135.041669441374,
    "anchors": 69798
   },
   "scgc": {
-   "fps": 137.24763609390473,
-   "anchors": 67095
+   "fps": 139.55067761239022,
+   "anchors": 64229
   }
  },
  "nerf_synthetic/mic": {
   "scaffold": {
-   "fps": 165.1216059648383,
+   "fps": 165.40509183872055,
    "anchors": 36170
   },
   "scgc": {
-   "fps": 161.24489154273408,
-   "anchors": 41520
+   "fps": 161.31641680694722,
+   "anchors": 40801
   }
  },
  "nerf_synthetic/ship": {
   "scaffold": {
-   "fps": 136.60813725745115,
+   "fps": 136.12075422221503,
    "anchors": 68334
   },
   "scgc": {
-   "fps": 133.2176224548274,
-   "anchors": 74199
+   "fps": 135.1562820559366,
+   "anchors": 71617
   }
  },
  "tandt/train": {
   "scaffold": {
-   "fps": 103.58376950817761,
+   "fps": 103.12394180293573,
    "anchors": 200053
   },
   "scgc": {
-   "fps": 130.54862455206307,
-   "anchors": 209489
+   "fps": 102.88965484296196,
+   "anchors": 214361
   }
  },
  "tandt/truck": {
   "scaffold": {
-   "fps": 102.62842508349884,
+   "fps": 103.08742251223073,
    "anchors": 311659
   },
   "scgc": {
-   "fps": 101.61479150394507,
-   "anchors": 332858
+   "fps": 101.46246510641065,
+   "anchors": 339836
   }
  }
 }
