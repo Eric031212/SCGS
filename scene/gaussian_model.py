@@ -75,6 +75,7 @@ class GaussianModel:
         self.add_color_dist = add_color_dist
 
         self._anchor = torch.empty(0)
+        self.anchor_delta = None  # SCGC: displacement driven by the control points
         self._offset = torch.empty(0)
         self._anchor_feat = torch.empty(0)
         
@@ -210,9 +211,16 @@ class GaussianModel:
     
     @property
     def get_anchor(self):
+        if self.anchor_delta is not None and self.anchor_delta.shape == self._anchor.shape:
+            return self._anchor + self.anchor_delta
         return self._anchor
-    
-    @property
+
+    @torch.no_grad()
+    def commit_anchor_delta(self):
+        if self.anchor_delta is not None and self.anchor_delta.shape == self._anchor.shape:
+            self._anchor.data += self.anchor_delta.detach()
+        self.anchor_delta = None
+
     def set_anchor(self, new_anchor):
         assert self._anchor.shape == new_anchor.shape
         del self._anchor

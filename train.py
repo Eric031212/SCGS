@@ -13,17 +13,19 @@ import os
 import numpy as np
 
 import subprocess
-cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
-result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
-os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
-
-os.system('echo $CUDA_VISIBLE_DEVICES')
+if 'CUDA_VISIBLE_DEVICES' not in os.environ:  # under Slurm the scheduler already picked the GPU
+    cmd = 'nvidia-smi -q -d Memory |grep -A4 GPU|grep Used'
+    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout.decode().split('\n')
+    os.environ['CUDA_VISIBLE_DEVICES']=str(np.argmin([int(x.split()[2]) for x in result[:-1]]))
 
 
 import torch
 import torchvision
 import json
-import wandb
+try:
+    import wandb
+except ImportError:
+    wandb = None
 import time
 from os import makedirs
 import shutil, pathlib
@@ -37,6 +39,7 @@ from utils.loss_utils import l1_loss, ssim
 from gaussian_renderer import prefilter_voxel, render, network_gui
 import sys
 from scene import Scene, GaussianModel
+from scene.control_points import ControlPoints, gaussian_contrast
 from utils.general_utils import safe_state
 import uuid
 from tqdm import tqdm
@@ -86,6 +89,16 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
                               dataset.appearance_dim, dataset.ratio, dataset.add_opacity_dist, dataset.add_cov_dist, dataset.add_color_dist)
     scene = Scene(dataset, gaussians, ply_path=ply_path, shuffle=False)
     gaussians.training_setup(opt)
+
+    ctrl = None
+    if opt.ctrl_mode != "none":
+        ctrl = ControlPoints(opt.num_ctrl, d_model=opt.ctrl_dim, n_layers=opt.ctrl_layers, n_heads=opt.ctrl_heads,
+                             k=opt.ctrl_knn, sigma=opt.ctrl_sigma, mode=opt.ctrl_mode, max_step=opt.ctrl_max_step,
+                             max_total=opt.ctrl_max_total)
+        ctrl.init_from_anchors(gaussians.get_anchor)
+        ctrl_optim = torch.optim.Adam(ctrl.parameters(), lr=opt.ctrl_lr)
+        logger.info(f"[SCGC] {ctrl.num} control points ({opt.ctrl_mode}), spacing {ctrl.spacing.item():.4f}, "
+                    f"{sum(p.numel() for p in ctrl.parameters())} params")
     if checkpoint:
         (model_params, first_iter) = torch.load(checkpoint)
         gaussians.restore(model_params, opt)
@@ -131,6 +144,11 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         if (iteration - 1) == debug_from:
             pipe.debug = True
         
+        if ctrl is not None:
+            if gaussians._anchor.shape[0] != ctrl.anchor_idx.shape[0] or iteration % opt.knn_interval == 0:
+                ctrl.assign(gaussians._anchor)
+            gaussians.anchor_delta, ctrl_step = ctrl.anchor_delta(gaussians._anchor)
+
         voxel_visible_mask = prefilter_voxel(viewpoint_cam, gaussians, pipe,background)
         retain_grad = (iteration < opt.update_until and iteration >= 0)
         render_pkg = render(viewpoint_cam, gaussians, pipe, background, visible_mask=voxel_visible_mask, retain_grad=retain_grad)
@@ -144,7 +162,17 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
         scaling_reg = scaling.prod(dim=1).mean()
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * ssim_loss + 0.01*scaling_reg
 
+        if ctrl is not None:
+            loss = loss + opt.lambda_ctrl * ctrl_step.abs().mean()          # L_ctrl = ||P' - P||_1 (spacing units)
+            if iteration > opt.contrast_from and opt.lambda_cc > 0:
+                loss = loss + opt.lambda_cc * ctrl.control_contrast(opt.contrast_tau)
+        if ctrl is not None and iteration > opt.contrast_from and opt.lambda_gc > 0 and iteration % opt.gc_interval == 0:
+            image_pert = render(viewpoint_cam, gaussians, pipe, background, visible_mask=voxel_visible_mask, perturb=opt.gc_perturb)["render"]
+            loss = loss + opt.lambda_gc * gaussian_contrast(image.detach() if opt.gc_detach else image, image_pert, gt_image, tau=opt.contrast_tau)
+
         loss.backward()
+        if ctrl is not None:
+            gaussians.anchor_delta = gaussians.anchor_delta.detach()
         
         iter_end.record()
 
@@ -158,11 +186,26 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             if iteration == opt.iterations:
                 progress_bar.close()
 
+            # SCGC control point update: P <- P', bake the anchor displacement
+            if ctrl is not None:
+                densify_now = opt.update_from < iteration < opt.update_until and iteration % opt.update_interval == 0
+                if densify_now or iteration == opt.iterations:
+                    # bake anchors so densification / saving see the displaced positions exactly once
+                    gaussians.commit_anchor_delta()
+                    ctrl.rebase()
+                if iteration % opt.ctrl_update_interval == 0:
+                    ctrl.commit()
+                if iteration % 1000 == 0:
+                    drift = ((ctrl.pos - ctrl.pos_init).norm(dim=1) / ctrl.spacing)
+                    logger.info(f"[SCGC {iteration}] control drift / spacing: mean {drift.mean():.3f} max {drift.max():.3f}")
+
             # Log and save
             training_report(tb_writer, dataset_name, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, scene, render, (pipe, background), wandb, logger)
             if (iteration in saving_iterations):
                 logger.info("\n[ITER {}] Saving Gaussians".format(iteration))
                 scene.save(iteration)
+                if ctrl is not None:
+                    torch.save(ctrl.capture(), os.path.join(scene.model_path, f"point_cloud/iteration_{iteration}/control_points.pth"))
             
             # densification
             if iteration < opt.update_until and iteration > opt.start_stat:
@@ -182,6 +225,9 @@ def training(dataset, opt, pipe, dataset_name, testing_iterations, saving_iterat
             if iteration < opt.iterations:
                 gaussians.optimizer.step()
                 gaussians.optimizer.zero_grad(set_to_none = True)
+                if ctrl is not None:
+                    ctrl_optim.step()
+                    ctrl_optim.zero_grad(set_to_none=True)
             if (iteration in checkpoint_iterations):
                 logger.info("\n[ITER {}] Saving Checkpoint".format(iteration))
                 torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
@@ -472,6 +518,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
     parser.add_argument("--gpu", type=str, default = '-1')
+    parser.add_argument("--seed", type=int, default = 0)
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
 
@@ -517,7 +564,7 @@ if __name__ == "__main__":
     logger.info("Optimizing " + args.model_path)
 
     # Initialize system state (RNG)
-    safe_state(args.quiet)
+    safe_state(args.quiet, args.seed)
 
     # Start GUI server, configure and run training
     network_gui.init(args.ip, args.port)

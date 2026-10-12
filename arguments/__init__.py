@@ -152,6 +152,28 @@ class OptimizationParams(ParamGroup):
         self.success_threshold = 0.8
         self.densify_grad_threshold = 0.0002
 
+        # SCGC
+        self.ctrl_mode = "none"            # none | free | transformer
+        self.num_ctrl = 512
+        self.ctrl_layers = 2
+        self.ctrl_heads = 4
+        self.ctrl_dim = 128
+        self.ctrl_knn = 4
+        self.ctrl_sigma = 1.0              # in units of control-point spacing (≈0.1 on Blender)
+        self.ctrl_max_step = 0.5           # max control-point move per update, in units of spacing
+        self.ctrl_max_total = 0.25         # max total move from the FPS initialisation, in units of spacing
+        self.ctrl_lr = 1e-4
+        self.ctrl_update_interval = 100
+        self.knn_interval = 500
+        self.contrast_from = 1000
+        self.lambda_ctrl = 0.1
+        self.lambda_cc = 0.05              # control-point contrast
+        self.lambda_gc = 0.002             # Gaussian-level contrast (paper: 0.02, costs ~2 dB here, see README)
+        self.contrast_tau = 0.1
+        self.gc_interval = 2
+        self.gc_perturb = 0.05
+        self.gc_detach = False             # stop-gradient through the unperturbed render
+
         super().__init__(parser, "Optimization Parameters")
 
 def get_combined_args(parser : ArgumentParser):

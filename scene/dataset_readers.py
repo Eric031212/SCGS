@@ -269,13 +269,13 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
                 dist = np.array([frame["k1"], frame["k2"], frame["p1"], frame["p2"], frame["k3"]], dtype=np.float32)
                 im_data = np.array(image.convert("RGB"))
                 arr = cv2.undistort(im_data / 255.0, mtx, dist, None, mtx)
-                image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+                image = Image.fromarray(np.array(arr*255.0, dtype=np.uint8), "RGB")  # np.byte: same bits, rejected by Pillow>=10
             else:
                 im_data = np.array(image.convert("RGBA"))
                 bg = np.array([1,1,1]) if white_background else np.array([0, 0, 0])
                 norm_data = im_data / 255.0
                 arr = norm_data[:,:,:3] * norm_data[:, :, 3:4] + bg * (1 - norm_data[:, :, 3:4])
-                image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+                image = Image.fromarray(np.array(arr*255.0, dtype=np.uint8), "RGB")  # np.byte: same bits, rejected by Pillow>=10
 
             if fovx is not None:
                 fovy = focal2fov(fov2focal(fovx, image.size[0]), image.size[1])
