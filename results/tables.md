@@ -40,7 +40,7 @@
 | Method | bicycle | garden | stump | flowers | treehill | room | counter | kitchen | bonsai | Avg PSNR | Avg SSIM | Avg LPIPS |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Scaffold-GS | 25.20 | 27.48 | 26.61 | 21.44 | 23.09 | 32.02 | 29.51 | 31.60 | 32.58 | 27.73 | 0.815 | 0.220 |
-| SCGC (ours) | – | – | – | – | – | – | – | – | – | – | – | – |
+| SCGC (ours) | 25.29 | 27.34 | 26.61 | 21.25 | 22.89 | 31.88 | 29.52 | 31.25 | 32.65 | 27.63 | 0.812 | 0.219 |
 
 (per-scene cells are PSNR; one seed)
 
@@ -49,7 +49,7 @@
 | Method | truck | train | Avg PSNR | Avg SSIM | Avg LPIPS |
 |---|---|---|---|---|---|
 | Scaffold-GS | 25.78 | 22.40 | 24.09 | 0.854 | 0.174 |
-| SCGC (ours) | – | – | – | – | – |
+| SCGC (ours) | 25.81 | 22.24 | 24.03 | 0.847 | 0.183 |
 
 (per-scene cells are PSNR; one seed)
 
@@ -58,7 +58,7 @@
 | Method | playroom | drjohnson | Avg PSNR | Avg SSIM | Avg LPIPS |
 |---|---|---|---|---|---|
 | Scaffold-GS | 30.86 | 29.72 | 30.29 | 0.909 | 0.253 |
-| SCGC (ours) | – | – | – | – | – |
+| SCGC (ours) | 30.87 | 29.58 | 30.22 | 0.909 | 0.252 |
 
 (per-scene cells are PSNR; one seed)
 
@@ -80,23 +80,23 @@
 |---|---|---|---|
 | 256 pts | 33.40 | 0.967 | 0.034 |
 | SCGC (ours) | 33.40 | 0.967 | 0.034 |
-| 1024 pts | – | – | – |
+| 1024 pts | 33.39 | 0.967 | 0.034 |
 
 ## Transformer size (paper Table 3)
 
 | Config | PSNR | SSIM | LPIPS |
 |---|---|---|---|
-| 1L-2H | – | – | – |
+| 1L-2H | 33.40 | 0.967 | 0.034 |
 | SCGC (ours) | 33.40 | 0.967 | 0.034 |
-| 4L-4H | – | – | – |
-| 2L-8H | – | – | – |
+| 4L-4H | 33.40 | 0.967 | 0.034 |
+| 2L-8H | 33.40 | 0.967 | 0.034 |
 
 ## Loss weights λ1 / λ2 / λ3 (paper Table 4; paper default 0.10 / 0.05 / 0.02, ours 0.10 / 0.05 / 0.002)
 
 | Config | PSNR | SSIM | LPIPS |
 |---|---|---|---|
 | 0.01 / 0.01 / 0.01 | – | – | – |
-| SCGC, paper λ3 = 0.02 | – | – | – |
+| SCGC, paper λ3 = 0.02 | 31.38 | 0.962 | 0.045 |
 | 0.15 / 0.03 / 0.01 | – | – | – |
 | 0.30 / 0.10 / 0.05 | – | – | – |
 | SCGC (ours) | 33.40 | 0.967 | 0.034 |

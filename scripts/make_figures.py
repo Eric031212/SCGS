@@ -57,7 +57,9 @@ def compare(dataset, scene, crop=0.22):
     picks = [("largest gain", names[int(np.argmax(gain))]), ("median view", names[int(np.argsort(gain)[len(gain) // 2])])]
 
     load = lambda p: np.asarray(Image.open(p).convert("RGB"), dtype=np.float32) / 255.0
-    fig, axes = plt.subplots(len(picks), 5, figsize=(13, 2.75 * len(picks)), squeeze=False,
+    H0, W0 = Image.open(os.path.join(a, "gt", picks[0][1])).size[::-1]
+    row_h = 13 / 5 * H0 / W0 + 0.4                      # panel height from the image aspect + title
+    fig, axes = plt.subplots(len(picks), 5, figsize=(13, row_h * len(picks)), squeeze=False,
                              gridspec_kw={"wspace": 0.04, "hspace": 0.18})
     for r, (label, n) in enumerate(picks):
         gt, ra, rb = load(os.path.join(a, "gt", n)), load(os.path.join(a, "renders", n)), load(os.path.join(b, "renders", n))

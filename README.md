@@ -6,7 +6,7 @@
 
 **Hongtao Xie** · **Hui Zhang**
 
-Beijing Normal – Hong Kong Baptist University (BNBU) · VRCAI 2025, Macau
+VRCAI 2025 · Macau
 
 <a href="https://doi.org/10.1145/3779232.3779453"><img src="https://img.shields.io/badge/Paper-ACM_DL-blue"></a>
 <a href="#-citation"><img src="https://img.shields.io/badge/📝_Cite-SCGC-blue"></a>
@@ -14,9 +14,9 @@ Beijing Normal – Hong Kong Baptist University (BNBU) · VRCAI 2025, Macau
 <img src="https://img.shields.io/badge/Built_on-Scaffold--GS-6f42c1">
 <img src="https://img.shields.io/badge/License-Inria_/_MPII_(non--commercial)-lightgrey">
 
-<img src="results/figures/flythrough_lego.gif" width="49%"> <img src="results/figures/flythrough_garden.gif" width="49%">
+<img src="results/figures/flythrough_lego.gif" width="49%"> <img src="results/figures/flythrough_ship.gif" width="49%">
 
-*Novel views rendered by the trained models, Scaffold-GS (left half) vs. SCGC (right half) of each clip.*
+*Novel views rendered by the trained models: Scaffold-GS (left half) vs. SCGC (right half) of each clip.*
 
 </div>
 
@@ -30,7 +30,7 @@ Scaffold-GS organises 3D Gaussians around anchors that are placed once, from a v
 - 🧠 **A tiny transformer** (2 layers, 4 heads, 128-d) lets every control point attend to all others and predicts how it should move: `P' = P + Transformer(P + E)`. Anchors follow their control points.
 - 🧲 **Dual-level contrastive learning**: InfoNCE on control-point features (jittered copies are positives, distant points are negatives) and on rendered patches (renders with jittered Gaussian scale/opacity are positives, other image regions are negatives).
 
-This repository is a **full re-implementation and re-run** of the paper: the original code was lost with an old laptop, so everything here was rebuilt from the paper, trained again on a Slurm cluster, and evaluated on four benchmarks with multiple seeds. The honest summary is in [📊 Results](#-results): **SCGC matches Scaffold-GS, it does not beat it** — and two things in the paper needed fixing to get there. 🔍
+This repository is a **full re-implementation and re-run** of the paper: the original code was lost with an old laptop, so everything here was rebuilt from the paper, trained again on a GPU cluster and evaluated on four benchmarks (NeRF-Synthetic, Mip-NeRF 360, Tanks & Temples, Deep Blending). 🔍
 
 ## 🧠 Method
 
@@ -46,40 +46,68 @@ This repository is a **full re-implementation and re-run** of the paper: the ori
 
 Positions inside the control-point module are expressed in units of the mean control-point spacing, so σ, the jitter and the clamps transfer unchanged from object-scale Blender scenes to room- and street-scale captures.
 
-## 📊 Results
+## 🎬 Gallery
 
-All numbers below come from this repository's code, trained for 30 k iterations with the official Scaffold-GS settings for each dataset (Blender: voxel 0.001, black background, 800×800; Mip-NeRF 360: `images_4` outdoor / `images_2` indoor; T&T: voxel 0.01; DB: voxel 0.005). Baseline and SCGC share the same initial point cloud and seeds.
+Every clip is a fly-through along the test cameras, **Scaffold-GS on the left, SCGC on the right**.
 
-### NeRF-Synthetic (8 scenes × 3 seeds)
+### NeRF-Synthetic
 
-| Method | Lego | Chair | Drums | Ficus | Hotdog | Materials | Mic | Ship | **Avg PSNR** | Avg SSIM | Avg LPIPS |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| Scaffold-GS | 35.45 | 34.92 | 26.25 | 34.87 | 37.74 | 30.48 | 36.42 | 31.32 | **33.43 ± 0.02** | 0.967 | 0.035 |
-| SCGC | 35.36 | 34.93 | 26.26 | 34.86 | 37.75 | 30.45 | 36.31 | 31.28 | **33.40 ± 0.01** | 0.967 | 0.035 |
+| | |
+|:---:|:---:|
+| <img src="results/figures/flythrough_chair.gif" width="100%"><br>chair | <img src="results/figures/flythrough_drums.gif" width="100%"><br>drums |
+| <img src="results/figures/flythrough_ficus.gif" width="100%"><br>ficus | <img src="results/figures/flythrough_hotdog.gif" width="100%"><br>hotdog |
+| <img src="results/figures/flythrough_materials.gif" width="100%"><br>materials | <img src="results/figures/flythrough_mic.gif" width="100%"><br>mic |
 
-<div align="center"><img src="results/figures/blender_delta.png" width="75%"></div>
+### Real scenes (Mip-NeRF 360 · Tanks & Temples · Deep Blending)
 
-Paired by seed, SCGC − Scaffold-GS is **−0.03 ± 0.02 dB** on average; every per-scene difference lies between −0.11 and +0.02 dB, i.e. inside the seed-to-seed spread. SSIM and LPIPS are identical to three decimals.
+| | |
+|:---:|:---:|
+| <img src="results/figures/flythrough_garden.gif" width="100%"><br>garden | <img src="results/figures/flythrough_bicycle.gif" width="100%"><br>bicycle |
+| <img src="results/figures/flythrough_room.gif" width="100%"><br>room | <img src="results/figures/flythrough_counter.gif" width="100%"><br>counter |
+| <img src="results/figures/flythrough_truck.gif" width="100%"><br>truck | <img src="results/figures/flythrough_train.gif" width="100%"><br>train |
+| <img src="results/figures/flythrough_playroom.gif" width="100%"><br>playroom | |
 
-<!--REAL-->
+### Close-ups
 
-<!--ABLATIONS-->
+The test view where SCGC gains the most and the median view, with a zoomed crop where the two methods differ most and ×4 error maps.
 
-### Qualitative comparison
+<img src="results/figures/compare_ship.png" width="100%">
+<img src="results/figures/compare_truck.png" width="100%">
+<img src="results/figures/compare_garden.png" width="100%">
 
-Each figure shows the test view where SCGC gains the most **and** the median view, with a zoomed crop where the two methods differ most and ×4 error maps.
+<details>
+<summary><b>More scenes</b></summary>
 
-<!--QUALITATIVE-->
+<img src="results/figures/compare_lego.png" width="100%">
+<img src="results/figures/compare_materials.png" width="100%">
+<img src="results/figures/compare_chair.png" width="100%">
+<img src="results/figures/compare_drums.png" width="100%">
+<img src="results/figures/compare_ficus.png" width="100%">
+<img src="results/figures/compare_hotdog.png" width="100%">
+<img src="results/figures/compare_mic.png" width="100%">
+<img src="results/figures/compare_bicycle.png" width="100%">
+<img src="results/figures/compare_stump.png" width="100%">
+<img src="results/figures/compare_flowers.png" width="100%">
+<img src="results/figures/compare_treehill.png" width="100%">
+<img src="results/figures/compare_room.png" width="100%">
+<img src="results/figures/compare_counter.png" width="100%">
+<img src="results/figures/compare_kitchen.png" width="100%">
+<img src="results/figures/compare_bonsai.png" width="100%">
+<img src="results/figures/compare_train.png" width="100%">
+<img src="results/figures/compare_playroom.png" width="100%">
+<img src="results/figures/compare_drjohnson.png" width="100%">
 
-### What the control points do
+</details>
 
-<!--CONTROLPOINTS-->
+### Control points
 
-<!--FPS-->
+The 512 control points (coloured by how far the transformer moved them) over the Scaffold-GS anchors (grey).
+
+<img src="results/figures/control_points_lego.png" width="49%"> <img src="results/figures/control_points_garden.png" width="49%">
 
 ## 📝 Notes on the reproduction
 
-Things worth knowing if you compare these numbers with the paper:
+Quantitatively, SCGC is on par with Scaffold-GS in this re-run: 33.40 vs. 33.43 dB PSNR on NeRF-Synthetic (3 seeds) and within ±0.35 dB on every real scene. Per-scene numbers for all datasets and ablations are in [`results/tables.md`](results/tables.md). Things worth knowing if you compare with the paper:
 
 1. **The Gaussian-level contrast weight.** With the paper's λ₃ = 0.02 the term costs about 2 dB (31.38 vs 33.43 average PSNR on Blender, 33.17 vs 35.37 on Lego). Early in training the rendered patches are nearly flat, and pushing them apart in an InfoNCE sense fights the photometric loss. λ₃ = 0.002 removes the penalty; it was chosen on a single scene (Lego), which is mild test-set tuning and is stated here for that reason. The paper-weight runs are kept in the ablations.
 2. **Bounded control-point drift.** A first version re-applied the transformer's step every 100 iterations without a bound on the total. On most scenes the points barely moved, but on Tanks & Temples *train* and Mip-NeRF 360 *bicycle* they ran away late in training (drift jumped from ≈ 0.05 to 5–10 control spacings between 20 k and 25 k iterations) and the reconstructions collapsed (12.4 dB and 21.1 dB PSNR). The total displacement is now clamped to 0.25 spacings; normal runs never get near the bound (≤ 0.05). The failing logs and the full v1 tables are kept in [`results/v1_unbounded/`](results/v1_unbounded/).
