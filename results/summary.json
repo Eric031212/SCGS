@@ -1,0 +1,50 @@
+{
+ "mipnerf360": {
+  "scaffold": {
+   "PSNR": 27.726229349772137,
+   "SSIM": 0.8148397339714898,
+   "LPIPS": 0.22042393932739893
+  },
+  "scgc": {
+   "PSNR": null,
+   "SSIM": null,
+   "LPIPS": null
+  }
+ },
+ "tandt": {
+  "scaffold": {
+   "PSNR": 24.089497566223145,
+   "SSIM": 0.8536647856235504,
+   "LPIPS": 0.17383676022291183
+  },
+  "scgc": {
+   "PSNR": null,
+   "SSIM": null,
+   "LPIPS": null
+  }
+ },
+ "db": {
+  "scaffold": {
+   "PSNR": 30.28920269012451,
+   "SSIM": 0.9094798862934113,
+   "LPIPS": 0.2526746392250061
+  },
+  "scgc": {
+   "PSNR": null,
+   "SSIM": null,
+   "LPIPS": null
+  }
+ },
+ "nerf_synthetic": {
+  "scaffold": {
+   "PSNR": 33.431687116622925,
+   "SSIM": 0.9666536897420883,
+   "LPIPS": 0.03483952663373202
+  },
+  "scgc": {
+   "PSNR": 33.40085879961649,
+   "SSIM": 0.9665836195151012,
+   "LPIPS": 0.03460422503606726
+  }
+ }
+}

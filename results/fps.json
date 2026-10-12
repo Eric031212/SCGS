@@ -1,0 +1,213 @@
+{
+ "gpu": "NVIDIA GeForce RTX 2080 Ti",
+ "db/drjohnson": {
+  "scaffold": {
+   "fps": 142.3959380905857,
+   "anchors": 195086
+  },
+  "scgc": {
+   "fps": 133.18142049757154,
+   "anchors": 221120
+  }
+ },
+ "db/playroom": {
+  "scaffold": {
+   "fps": 155.72399165783645,
+   "anchors": 159292
+  },
+  "scgc": {
+   "fps": 158.91542005158047,
+   "anchors": 180871
+  }
+ },
+ "mipnerf360/bicycle": {
+  "scaffold": {
+   "fps": 61.512926457734075,
+   "anchors": 989620
+  },
+  "scgc": {
+   "fps": 54.160221025865376,
+   "anchors": 1091740
+  }
+ },
+ "mipnerf360/bonsai": {
+  "scaffold": {
+   "fps": 74.04455768193941,
+   "anchors": 415620
+  },
+  "scgc": {
+   "fps": 74.56100989763486,
+   "anchors": 428413
+  }
+ },
+ "mipnerf360/counter": {
+  "scaffold": {
+   "fps": 70.70208869391732,
+   "anchors": 281979
+  },
+  "scgc": {
+   "fps": 69.98652320339507,
+   "anchors": 298698
+  }
+ },
+ "mipnerf360/flowers": {
+  "scaffold": {
+   "fps": 86.33223857686441,
+   "anchors": 727559
+  },
+  "scgc": {
+   "fps": 78.179365378815,
+   "anchors": 805908
+  }
+ },
+ "mipnerf360/garden": {
+  "scaffold": {
+   "fps": 58.38487866075297,
+   "anchors": 731674
+  },
+  "scgc": {
+   "fps": 55.44775709984566,
+   "anchors": 771727
+  }
+ },
+ "mipnerf360/kitchen": {
+  "scaffold": {
+   "fps": 56.01408842301696,
+   "anchors": 340427
+  },
+  "scgc": {
+   "fps": 47.61707732973158,
+   "anchors": 394866
+  }
+ },
+ "mipnerf360/room": {
+  "scaffold": {
+   "fps": 98.19032974447249,
+   "anchors": 281318
+  },
+  "scgc": {
+   "fps": 95.72773126750882,
+   "anchors": 296336
+  }
+ },
+ "mipnerf360/stump": {
+  "scaffold": {
+   "fps": 88.00985510236734,
+   "anchors": 827733
+  },
+  "scgc": {
+   "fps": 75.99148313291167,
+   "anchors": 905338
+  }
+ },
+ "mipnerf360/treehill": {
+  "scaffold": {
+   "fps": 80.80671563753282,
+   "anchors": 773142
+  },
+  "scgc": {
+   "fps": 73.18856785372913,
+   "anchors": 848569
+  }
+ },
+ "nerf_synthetic/chair": {
+  "scaffold": {
+   "fps": 158.80917151781827,
+   "anchors": 41581
+  },
+  "scgc": {
+   "fps": 161.06628340567906,
+   "anchors": 41704
+  }
+ },
+ "nerf_synthetic/drums": {
+  "scaffold": {
+   "fps": 137.16904248678105,
+   "anchors": 67521
+  },
+  "scgc": {
+   "fps": 133.99204252293777,
+   "anchors": 72733
+  }
+ },
+ "nerf_synthetic/ficus": {
+  "scaffold": {
+   "fps": 158.65332732069623,
+   "anchors": 43134
+  },
+  "scgc": {
+   "fps": 157.93523743920963,
+   "anchors": 43463
+  }
+ },
+ "nerf_synthetic/hotdog": {
+  "scaffold": {
+   "fps": 174.66971569226737,
+   "anchors": 25654
+  },
+  "scgc": {
+   "fps": 172.87033672376617,
+   "anchors": 28360
+  }
+ },
+ "nerf_synthetic/lego": {
+  "scaffold": {
+   "fps": 147.96629877289303,
+   "anchors": 54349
+  },
+  "scgc": {
+   "fps": 146.21247716031377,
+   "anchors": 56382
+  }
+ },
+ "nerf_synthetic/materials": {
+  "scaffold": {
+   "fps": 135.20620433514975,
+   "anchors": 69798
+  },
+  "scgc": {
+   "fps": 137.24763609390473,
+   "anchors": 67095
+  }
+ },
+ "nerf_synthetic/mic": {
+  "scaffold": {
+   "fps": 165.1216059648383,
+   "anchors": 36170
+  },
+  "scgc": {
+   "fps": 161.24489154273408,
+   "anchors": 41520
+  }
+ },
+ "nerf_synthetic/ship": {
+  "scaffold": {
+   "fps": 136.60813725745115,
+   "anchors": 68334
+  },
+  "scgc": {
+   "fps": 133.2176224548274,
+   "anchors": 74199
+  }
+ },
+ "tandt/train": {
+  "scaffold": {
+   "fps": 103.58376950817761,
+   "anchors": 200053
+  },
+  "scgc": {
+   "fps": 130.54862455206307,
+   "anchors": 209489
+  }
+ },
+ "tandt/truck": {
+  "scaffold": {
+   "fps": 102.62842508349884,
+   "anchors": 311659
+  },
+  "scgc": {
+   "fps": 101.61479150394507,
+   "anchors": 332858
+  }
+ }
+}

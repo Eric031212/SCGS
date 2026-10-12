@@ -1,0 +1,54 @@
+2026-10-11 23:21:08,548 - INFO: args: Namespace(sh_degree=3, feat_dim=32, n_offsets=10, voxel_size=0.01, update_depth=3, update_init_factor=16, update_hierachy_factor=4, use_feat_bank=False, source_path='data/tandt/train', model_path='/ltmp/hxie36/scgc_42547_11/outputs/tandt/train/scgc/seed0', images='images', resolution=-1, white_background=False, data_device='cuda', eval=True, lod=0, appearance_dim=0, lowpoly=False, ds=1, ratio=1, undistorted=False, add_opacity_dist=False, add_cov_dist=False, add_color_dist=False, iterations=30000, position_lr_init=0.0, position_lr_final=0.0, position_lr_delay_mult=0.01, position_lr_max_steps=30000, offset_lr_init=0.01, offset_lr_final=0.0001, offset_lr_delay_mult=0.01, offset_lr_max_steps=30000, feature_lr=0.0075, opacity_lr=0.02, scaling_lr=0.007, rotation_lr=0.002, mlp_opacity_lr_init=0.002, mlp_opacity_lr_final=2e-05, mlp_opacity_lr_delay_mult=0.01, mlp_opacity_lr_max_steps=30000, mlp_cov_lr_init=0.004, mlp_cov_lr_final=0.004, mlp_cov_lr_delay_mult=0.01, mlp_cov_lr_max_steps=30000, mlp_color_lr_init=0.008, mlp_color_lr_final=5e-05, mlp_color_lr_delay_mult=0.01, mlp_color_lr_max_steps=30000, mlp_featurebank_lr_init=0.01, mlp_featurebank_lr_final=1e-05, mlp_featurebank_lr_delay_mult=0.01, mlp_featurebank_lr_max_steps=30000, appearance_lr_init=0.05, appearance_lr_final=0.0005, appearance_lr_delay_mult=0.01, appearance_lr_max_steps=30000, percent_dense=0.01, lambda_dssim=0.2, start_stat=500, update_from=1500, update_interval=100, update_until=15000, min_opacity=0.005, success_threshold=0.8, densify_grad_threshold=0.0002, ctrl_mode='transformer', num_ctrl=512, ctrl_layers=2, ctrl_heads=4, ctrl_dim=128, ctrl_knn=4, ctrl_sigma=1.0, ctrl_max_step=0.5, ctrl_lr=0.0001, ctrl_update_interval=100, knn_interval=500, contrast_from=1000, lambda_ctrl=0.1, lambda_cc=0.05, lambda_gc=0.002, contrast_tau=0.1, gc_interval=2, gc_perturb=0.05, gc_detach=False, convert_SHs_python=False, compute_cov3D_python=False, debug=False, ip='127.0.0.1', port=32224, debug_from=-1, detect_anomaly=False, warmup=False, use_wandb=False, test_iterations=[30000], save_iterations=[30000, 30000], quiet=False, checkpoint_iterations=[], start_checkpoint=None, gpu='-1', seed=0)
+2026-10-11 23:21:20,119 - INFO: Optimizing /ltmp/hxie36/scgc_42547_11/outputs/tandt/train/scgc/seed0
+2026-10-11 23:21:38,548 - INFO: [SCGC] 512 control points (transformer), spacing 5.8831, 389955 params
+2026-10-11 23:23:07,761 - INFO: [SCGC 1000] control drift / spacing: mean 0.011 max 0.033
+2026-10-11 23:25:01,851 - INFO: [SCGC 2000] control drift / spacing: mean 0.013 max 0.037
+2026-10-11 23:26:55,395 - INFO: [SCGC 3000] control drift / spacing: mean 0.017 max 0.053
+2026-10-11 23:28:48,751 - INFO: [SCGC 4000] control drift / spacing: mean 0.016 max 0.048
+2026-10-11 23:30:42,271 - INFO: [SCGC 5000] control drift / spacing: mean 0.020 max 0.066
+2026-10-11 23:32:36,185 - INFO: [SCGC 6000] control drift / spacing: mean 0.022 max 0.071
+2026-10-11 23:34:30,155 - INFO: [SCGC 7000] control drift / spacing: mean 0.023 max 0.074
+2026-10-11 23:36:24,191 - INFO: [SCGC 8000] control drift / spacing: mean 0.022 max 0.071
+2026-10-11 23:38:18,428 - INFO: [SCGC 9000] control drift / spacing: mean 0.022 max 0.067
+2026-10-11 23:40:13,531 - INFO: [SCGC 10000] control drift / spacing: mean 0.023 max 0.065
+2026-10-11 23:42:08,515 - INFO: [SCGC 11000] control drift / spacing: mean 0.023 max 0.065
+2026-10-11 23:44:03,972 - INFO: [SCGC 12000] control drift / spacing: mean 0.024 max 0.067
+2026-10-11 23:46:00,106 - INFO: [SCGC 13000] control drift / spacing: mean 0.024 max 0.064
+2026-10-11 23:47:56,872 - INFO: [SCGC 14000] control drift / spacing: mean 0.024 max 0.066
+2026-10-11 23:49:53,555 - INFO: [SCGC 15000] control drift / spacing: mean 0.027 max 0.079
+2026-10-11 23:51:47,100 - INFO: [SCGC 16000] control drift / spacing: mean 0.027 max 0.080
+2026-10-11 23:53:40,652 - INFO: [SCGC 17000] control drift / spacing: mean 0.028 max 0.076
+2026-10-11 23:55:33,987 - INFO: [SCGC 18000] control drift / spacing: mean 0.031 max 0.085
+2026-10-11 23:57:27,563 - INFO: [SCGC 19000] control drift / spacing: mean 0.033 max 0.094
+2026-10-11 23:59:21,670 - INFO: [SCGC 20000] control drift / spacing: mean 0.034 max 0.100
+2026-10-12 00:01:16,457 - INFO: [SCGC 21000] control drift / spacing: mean 0.033 max 0.100
+2026-10-12 00:03:10,483 - INFO: [SCGC 22000] control drift / spacing: mean 0.035 max 0.090
+2026-10-12 00:05:04,584 - INFO: [SCGC 23000] control drift / spacing: mean 0.034 max 0.091
+2026-10-12 00:06:58,955 - INFO: [SCGC 24000] control drift / spacing: mean 0.048 max 0.144
+2026-10-12 00:08:48,954 - INFO: [SCGC 25000] control drift / spacing: mean 4.003 max 4.816
+2026-10-12 00:10:32,292 - INFO: [SCGC 26000] control drift / spacing: mean 4.984 max 7.147
+2026-10-12 00:12:19,032 - INFO: [SCGC 27000] control drift / spacing: mean 4.983 max 7.921
+2026-10-12 00:14:07,541 - INFO: [SCGC 28000] control drift / spacing: mean 4.966 max 8.672
+2026-10-12 00:15:56,514 - INFO: [SCGC 29000] control drift / spacing: mean 4.964 max 9.241
+2026-10-12 00:17:45,039 - INFO: [SCGC 30000] control drift / spacing: mean 4.987 max 9.677
+2026-10-12 00:18:41,500 - INFO: 
+[ITER 30000] Evaluating test: L1 0.1868054543278719 PSNR 12.46159909900866
+2026-10-12 00:18:50,859 - INFO: 
+[ITER 30000] Evaluating train: L1 0.16933039128780367 PSNR 13.199960708618164
+2026-10-12 00:18:50,924 - INFO: 
+[ITER 30000] Saving Gaussians
+2026-10-12 00:18:55,113 - INFO: 
+Training complete.
+2026-10-12 00:18:55,114 - INFO: 
+Starting Rendering~
+2026-10-12 00:19:52,966 - INFO: Test FPS: [1;35m108.29397[0m
+2026-10-12 00:19:52,972 - INFO: 
+Rendering complete.
+2026-10-12 00:19:52,972 - INFO: 
+ Starting evaluation...
+2026-10-12 00:19:57,865 - INFO: model_paths: [1;35m/ltmp/hxie36/scgc_42547_11/outputs/tandt/train/scgc/seed0[0m
+2026-10-12 00:19:57,916 - INFO:   SSIM : [1;35m   0.4325809[0m
+2026-10-12 00:19:57,917 - INFO:   PSNR : [1;35m  12.4377260[0m
+2026-10-12 00:19:57,918 - INFO:   LPIPS: [1;35m   0.6333421[0m
+2026-10-12 00:19:57,923 - INFO: 
+Evaluating complete.

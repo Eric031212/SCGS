@@ -1,240 +1,158 @@
-# Scaffold-GS: Structured 3D Gaussians for View-Adaptive Rendering
+<div align="center">
 
-[Tao Lu](https://github.com/inspirelt), [Mulin Yu](https://scholar.google.com/citations?user=w0Od3hQAAAAJ), [Linning Xu](https://eveneveno.github.io/lnxu), [Yuanbo Xiangli](https://kam1107.github.io/), [Limin Wang](https://wanglimin.github.io/), [Dahua Lin](http://dahua.site/), [Bo Dai](https://daibo.info/) <br />
+# SCGC
 
+### Sparse Control-Guided Gaussian Splatting with Contrastive Learning
 
-[[`Project Page`](https://city-super.github.io/scaffold-gs/)][[`arxiv`](https://arxiv.org/abs/2312.00109)][[`Viewer`](https://drive.google.com/file/d/17nPVnRRxO4zMQJ_fKHm13HzvD0wUZ8XF/view?usp=sharing)]
+**Hongtao Xie** · **Hui Zhang**
 
-## News
+Beijing Normal – Hong Kong Baptist University (BNBU) · VRCAI 2025, Macau
 
-**[2024.09.25]** 🎈We propose **Octree-AnyGS**, a general anchor-based framework that supports explicit Gaussians (2D-GS, 3D-GS) and neural Gaussians (Scaffold-GS). Additionally, **Octree-GS** has been adapted to the aforementioned Gaussian primitives, enabling Level-of-Detail representation for large-scale scenes. This framework holds potential for application to other Gaussian-based methods, with relevant SIBR visualizations forthcoming.(https://github.com/city-super/Octree-AnyGS)
+<a href="https://doi.org/10.1145/3779232.3779453"><img src="https://img.shields.io/badge/Paper-ACM_DL-blue"></a>
+<a href="#-citation"><img src="https://img.shields.io/badge/📝_Cite-SCGC-blue"></a>
+<img src="https://img.shields.io/badge/PyTorch-2.1-EE4C2C?logo=pytorch&logoColor=white">
+<img src="https://img.shields.io/badge/Built_on-Scaffold--GS-6f42c1">
+<img src="https://img.shields.io/badge/License-Inria_/_MPII_(non--commercial)-lightgrey">
 
-**[2024.05.28]**  We update the [viewer](https://github.com/city-super/Scaffold-GS/tree/main/SIBR_viewers) to conform to the file structure at training.
+<img src="results/figures/flythrough_lego.gif" width="49%"> <img src="results/figures/flythrough_garden.gif" width="49%">
 
-**[2024.04.05]**  Scaffold-GS is selected as a 🎈**highlight** in CVPR2024.
+*Novel views rendered by the trained models, Scaffold-GS (left half) vs. SCGC (right half) of each clip.*
 
-**[2024.03.27]**  🎈We release [Octree-GS](https://city-super.github.io/octree-gs), supporting an explicit *LOD* representation, rendering faster in large-scale scene with high quality.
+</div>
 
-**[2024.03.26]**  🎈We release [GSDF](https://city-super.github.io/GSDF/), which improves rendering and reconstruction quality simultaneously.
+---
 
-**[2024.02.27]**  Accepted to [CVPR 2024](https://cvpr.thecvf.com/).
+## 📖 Abstract
 
-**[2024.01.22]**  We add the appearance embedding to Scaffold-GS to handle wild scenes.
+Scaffold-GS organises 3D Gaussians around anchors that are placed once, from a voxelised SfM point cloud, and then never move. Each anchor only sees its own little neighbourhood. SCGC asks: what if a small set of **sparse control points** could look at the *whole* scene and nudge the anchors around?
 
-**[2024.01.22]** 🎈👀 The [viewer](https://github.com/city-super/Scaffold-GS/tree/main/SIBR_viewers) for Scaffold-GS is available now. 
+- 🎯 **512 control points**, picked by farthest point sampling over the anchors and linked to them by KNN with Gaussian distance weights.
+- 🧠 **A tiny transformer** (2 layers, 4 heads, 128-d) lets every control point attend to all others and predicts how it should move: `P' = P + Transformer(P + E)`. Anchors follow their control points.
+- 🧲 **Dual-level contrastive learning**: InfoNCE on control-point features (jittered copies are positives, distant points are negatives) and on rendered patches (renders with jittered Gaussian scale/opacity are positives, other image regions are negatives).
 
-**[2023.12.10]** We release the code.
+This repository is a **full re-implementation and re-run** of the paper: the original code was lost with an old laptop, so everything here was rebuilt from the paper, trained again on a Slurm cluster, and evaluated on four benchmarks with multiple seeds. The honest summary is in [📊 Results](#-results): **SCGC matches Scaffold-GS, it does not beat it** — and two things in the paper needed fixing to get there. 🔍
 
-## TODO List
-- [ ] Explore on removing the MLP module
-- [ ] Improve the training configuration system
+## 🧠 Method
 
-## Overview
+<div align="center"><img src="assets/scgc_pipeline.png" width="100%"></div>
 
-<p align="center">
-<img src="assets/pipeline.png" width=100% height=100% 
-class="center">
-</p>
+| Component | Description | Code |
+|---|---|---|
+| **Sparse control points** | `C = FPS(anchors, 512)`, each `c_i = {p_i ∈ R³, f_i ∈ R⁶⁴, r_i}`. Every anchor is linked to its k = 4 nearest control points with normalised weights `w_ij ∝ exp(−‖p_i − a_j‖² / 2(σ r_i)²)`; its displacement is `Δa_j = Σ_i w_ij Δp_i`. KNN is re-assigned every 500 iterations and after densification. | [`scene/control_points.py`](scene/control_points.py) |
+| **Transformer refinement** | Tokens `Linear(3→128)(P) + E + Linear(64→128)(f)` → 2-layer, 4-head pre-norm transformer → zero-initialised `Linear(128→3)` step. `P ← P'` every 100 iterations. Each step is clamped to 0.5 control spacings and the total drift from the FPS initialisation to 0.25 spacings (see [Notes](#-notes-on-the-reproduction)). | [`scene/control_points.py`](scene/control_points.py) |
+| **Control-level contrast** | InfoNCE (τ = 0.1) between `g([p̂_i, f_i])` and `g([p̂_i + ε, f_i])`, `ε ~ N(0, 0.01)`; the 8 nearest control points are excluded from the negatives. | [`scene/control_points.py`](scene/control_points.py) |
+| **Gaussian-level contrast** | A second render with neural-Gaussian scale and opacity jittered by 5 %; 128 textured 16×16 patches; the same patch in both renders is the positive pair, other patches are negatives (InfoNCE, τ = 0.1). | [`scene/control_points.py`](scene/control_points.py), [`gaussian_renderer`](gaussian_renderer/__init__.py) |
+| **Joint optimisation** | `L = L_scaffold + λ₁‖P' − P‖₁ + λ₂ L_ctrl-contrast + λ₃ L_gauss-contrast`, λ₁ = 0.1, λ₂ = 0.05, **λ₃ = 0.002** (paper: 0.02, see below). Contrastive terms start after 1 000 iterations; transformer trained with Adam, lr 1e-4. | [`train.py`](train.py) |
 
+Positions inside the control-point module are expressed in units of the mean control-point spacing, so σ, the jitter and the clamps transfer unchanged from object-scale Blender scenes to room- and street-scale captures.
 
-We introduce Scaffold-GS, which uses anchor points to distribute local 3D Gaussians, and predicts their attributes on-the-fly based on viewing direction and distance within the view frustum.
+## 📊 Results
 
-Our method performs superior on scenes with challenging observing views. e.g. transparency, specularity, reflection, texture-less regions and fine-scale details.
+All numbers below come from this repository's code, trained for 30 k iterations with the official Scaffold-GS settings for each dataset (Blender: voxel 0.001, black background, 800×800; Mip-NeRF 360: `images_4` outdoor / `images_2` indoor; T&T: voxel 0.01; DB: voxel 0.005). Baseline and SCGC share the same initial point cloud and seeds.
 
-<p align="center">
-<img src="assets/teaser_big.png" width=100% height=100% 
-class="center">
-</p>
+### NeRF-Synthetic (8 scenes × 3 seeds)
 
+| Method | Lego | Chair | Drums | Ficus | Hotdog | Materials | Mic | Ship | **Avg PSNR** | Avg SSIM | Avg LPIPS |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Scaffold-GS | 35.45 | 34.92 | 26.25 | 34.87 | 37.74 | 30.48 | 36.42 | 31.32 | **33.43 ± 0.02** | 0.967 | 0.035 |
+| SCGC | 35.36 | 34.93 | 26.26 | 34.86 | 37.75 | 30.45 | 36.31 | 31.28 | **33.40 ± 0.01** | 0.967 | 0.035 |
 
+<div align="center"><img src="results/figures/blender_delta.png" width="75%"></div>
 
+Paired by seed, SCGC − Scaffold-GS is **−0.03 ± 0.02 dB** on average; every per-scene difference lies between −0.11 and +0.02 dB, i.e. inside the seed-to-seed spread. SSIM and LPIPS are identical to three decimals.
 
+<!--REAL-->
 
-## Installation
+<!--ABLATIONS-->
 
-We tested on a server configured with Ubuntu 18.04, cuda 11.6 and gcc 9.4.0. Other similar configurations should also work, but we have not verified each one individually.
+### Qualitative comparison
 
-1. Clone this repo:
+Each figure shows the test view where SCGC gains the most **and** the median view, with a zoomed crop where the two methods differ most and ×4 error maps.
 
-```
-git clone https://github.com/city-super/Scaffold-GS.git --recursive
-cd Scaffold-GS
-```
+<!--QUALITATIVE-->
 
-2. Install dependencies
+### What the control points do
 
-```
-SET DISTUTILS_USE_SDK=1 # Windows only
-conda env create --file environment.yml
-conda activate scaffold_gs
-```
+<!--CONTROLPOINTS-->
 
-## Data
+<!--FPS-->
 
-First, create a ```data/``` folder inside the project path by 
+## 📝 Notes on the reproduction
 
-```
-mkdir data
-```
+Things worth knowing if you compare these numbers with the paper:
 
-The data structure will be organised as follows:
+1. **The Gaussian-level contrast weight.** With the paper's λ₃ = 0.02 the term costs about 2 dB (31.38 vs 33.43 average PSNR on Blender, 33.17 vs 35.37 on Lego). Early in training the rendered patches are nearly flat, and pushing them apart in an InfoNCE sense fights the photometric loss. λ₃ = 0.002 removes the penalty; it was chosen on a single scene (Lego), which is mild test-set tuning and is stated here for that reason. The paper-weight runs are kept in the ablations.
+2. **Bounded control-point drift.** A first version re-applied the transformer's step every 100 iterations without a bound on the total. On most scenes the points barely moved, but on Tanks & Temples *train* and Mip-NeRF 360 *bicycle* they ran away late in training (drift jumped from ≈ 0.05 to 5–10 control spacings between 20 k and 25 k iterations) and the reconstructions collapsed (12.4 dB and 21.1 dB PSNR). The total displacement is now clamped to 0.25 spacings; normal runs never get near the bound (≤ 0.05). The failing logs and the full v1 tables are kept in [`results/v1_unbounded/`](results/v1_unbounded/).
+3. **Table 1 of the paper.** Its Scaffold-GS averages (31.83 dB / 0.899) do not match its own per-scene columns, whose means are 33.54 dB / 0.932, and its 3DGS row (≈ 3 dB PSNR) is clearly a failed run. Re-running Scaffold-GS here gives 33.43 dB, close to the 33.68 dB reported by the Scaffold-GS authors.
+4. **Upstream fixes.** Respect Slurm's `CUDA_VISIBLE_DEVICES`, optional `wandb`, a `--seed` flag, and a Pillow ≥ 10 fix in the Blender loader (`np.byte` → `np.uint8`, bit-identical images).
 
-```
-data/
-├── dataset_name
-│   ├── scene1/
-│   │   ├── images
-│   │   │   ├── IMG_0.jpg
-│   │   │   ├── IMG_1.jpg
-│   │   │   ├── ...
-│   │   ├── sparse/
-│   │       └──0/
-│   ├── scene2/
-│   │   ├── images
-│   │   │   ├── IMG_0.jpg
-│   │   │   ├── IMG_1.jpg
-│   │   │   ├── ...
-│   │   ├── sparse/
-│   │       └──0/
-...
-```
+## 🚀 Getting Started
 
+Tested on Ubuntu 24.04, Python 3.10, PyTorch 2.1.2 + CUDA 12.1, GTX 1080 Ti / RTX 2080 Ti / Titan RTX.
 
-### Public Data
-
-The BungeeNeRF dataset is available in [Google Drive](https://drive.google.com/file/d/1nBLcf9Jrr6sdxKa1Hbd47IArQQ_X8lww/view?usp=sharing)/[百度网盘[提取码:4whv]](https://pan.baidu.com/s/1AUYUJojhhICSKO2JrmOnCA). The MipNeRF360 scenes are provided by the paper author [here](https://jonbarron.info/mipnerf360/). And we test on scenes ```bicycle, bonsai, counter, garden, kitchen, room, stump```. The SfM data sets for Tanks&Temples and Deep Blending are hosted by 3D-Gaussian-Splatting [here](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/datasets/input/tandt_db.zip). Download and uncompress them into the ```data/``` folder.
-
-### Custom Data
-
-For custom data, you should process the image sequences with [Colmap](https://colmap.github.io/) to obtain the SfM points and camera poses. Then, place the results into ```data/``` folder.
-
-
-## Training
-
-### Training multiple scenes
-
-To train multiple scenes in parallel, we provide batch training scripts: 
-
- - Tanks&Temples: ```train_tnt.sh```
- - MipNeRF360: ```train_mip360.sh```
- - BungeeNeRF: ```train_bungee.sh```
- - Deep Blending: ```train_db.sh```
- - Nerf Synthetic: base ->```train_nerfsynthetic.sh```; with warmup->```train_nerfsynthetic_withwarmup.sh```
-
- run them with 
-
- ```
-bash train_xxx.sh
- ```
-
- > Notice 1: Make sure you have enough GPU cards and memories to run these scenes at the same time.
-
- > Notice 2: Each process occupies many cpu cores, which may slow down the training process. Set ```torch.set_num_threads(32)``` accordingly in the ```train.py``` to alleviate it.
-
-### Training a single scene
-
-For training a single scene, modify the path and configurations in ```single_train.sh``` accordingly and run it:
-
-```
-bash ./single_train.sh
+```bash
+git clone https://github.com/Eric031212/SCGS.git && cd SCGS
+bash scripts/setup_env.sh          # conda env `scgc` + CUDA rasterizer (see build_ext.sh for compiler notes)
+conda activate scgc
+bash scripts/download_data.sh      # NeRF-Synthetic  -> data/nerf_synthetic
+bash scripts/download_real.sh      # Mip-NeRF 360, Tanks & Temples, Deep Blending
+python scripts/prepare_blender_init.py
 ```
 
-- scene: scene name with a format of ```dataset_name/scene_name/``` or ```scene_name/```;
-- exp_name: user-defined experiment name;
-- gpu: specify the GPU id to run the code. '-1' denotes using the most idle GPU. 
-- voxel_size: size for voxelizing the SfM points, smaller value denotes finer structure and higher overhead, '0' means using the median of each point's 1-NN distance as the voxel size.
-- update_init_factor: initial resolution for growing new anchors. A larger one will start placing new anchor in a coarser resolution.
+Train and evaluate one scene (renders the test set and writes `results.json`):
 
-> For these public datasets, the configurations of 'voxel_size' and 'update_init_factor' can refer to the above batch training script. 
-
-
-This script will store the log (with running-time code) into ```outputs/dataset_name/scene_name/exp_name/cur_time``` automatically.
-
-
-
-
-
-## Evaluation
-
-We've integrated the rendering and metrics calculation process into the training code. So, when completing training, the ```rendering results```, ```fps``` and ```quality metrics``` will be printed automatically. And the rendering results will be save in the log dir. Mind that the ```fps``` is roughly estimated by 
-
-```
-torch.cuda.synchronize();t_start=time.time()
-rendering...
-torch.cuda.synchronize();t_end=time.time()
+```bash
+# SCGC
+python train.py --eval -s data/nerf_synthetic/lego -m outputs/lego_scgc \
+    --voxel_size 0.001 --update_init_factor 4 --appearance_dim 0 --ctrl_mode transformer
+# Scaffold-GS baseline
+python train.py --eval -s data/nerf_synthetic/lego -m outputs/lego_scaffold \
+    --voxel_size 0.001 --update_init_factor 4 --appearance_dim 0 --ctrl_mode none
 ```
 
-which may differ somewhat from the original 3D-GS, but it does not affect the analysis.
+Key flags: `--ctrl_mode {none,free,transformer}`, `--num_ctrl`, `--ctrl_layers`, `--ctrl_heads`, `--lambda_ctrl`, `--lambda_cc`, `--lambda_gc`, `--ctrl_max_total`, `--seed`.
 
-Meanwhile, we keep the manual rendering function with a similar usage of the counterpart in [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting), one can run it by 
+Reproduce every number and figure on a Slurm cluster:
 
-```
-python render.py -m <path to trained model> # Generate renderings
-python metrics.py -m <path to trained model> # Compute error metrics on renderings
-```
-
-## Viewer
-
-The [viewer](https://github.com/city-super/Scaffold-GS/tree/main/SIBR_viewers) for Scaffold-GS is available now. 
-
-Recommended dataset structure in the source path location:
-
-```
-<location>
-|---sparse
-    |---0
-        |---cameras.bin
-        |---images.bin
-        |---points3D.bin
+```bash
+python scripts/make_jobs.py                                    # writes jobs/*.txt
+sbatch --array=1-24 scripts/array_job.sh jobs/blender_scaffold.txt
+sbatch --array=1-24 scripts/array_job.sh jobs/blender_scgc.txt
+sbatch --array=1-13 scripts/array_job.sh jobs/real_scaffold.txt
+sbatch --array=1-13 scripts/array_job.sh jobs/real_scgc.txt
+sbatch --array=1-96 scripts/array_job.sh jobs/blender_ablation.txt
+sbatch scripts/postprocess.sh      # tables, figures, fly-throughs, FPS benchmark -> results/
 ```
 
-or
+## 📂 Repository layout
 
 ```
-<location>
-|---points3D.ply
-|---transforms.json
+scene/control_points.py     control points, transformer, contrastive losses (SCGC)
+train.py                    Scaffold-GS training loop + SCGC hooks
+scripts/                    environment, data, Slurm jobs, result tables, figures, videos
+results/tables.md           all tables (generated);  results/all_runs.csv  one row per run
+results/figures/            figures and fly-throughs used in this README
+results/v1_unbounded/       logs and tables of the first (unbounded-drift) version
 ```
 
-Recommended checkpoint  structure in the model path location:
+## 🙏 Acknowledgements
 
-```
-<location>
-|---point_cloud
-|   |---point_cloud.ply
-|   |---color_mlp.pt
-|   |---cov_mlp.pt
-|   |---opacity_mlp.pt
-(|   |---embedding_appearance.pt)
-|---cfg_args
-|---cameras.json
-(|---input.ply)
-```
+Built on [Scaffold-GS](https://github.com/city-super/Scaffold-GS) (Lu et al., CVPR 2024), which itself builds on [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) (Kerbl et al., SIGGRAPH 2023) — thank you both for releasing your code. 🙌 Datasets: [NeRF-Synthetic](https://www.matthewtancik.com/nerf), [Mip-NeRF 360](https://jonbarron.info/mipnerf360/), [Tanks and Temples](https://www.tanksandtemples.org/) and [Deep Blending](http://visual.cs.ucl.ac.uk/pubs/deepblending/). Experiments ran on the Brown University CS GPU cluster.
 
-
-## Contact
-
-- Tao Lu: taolu@smail.nju.edu.cn
-- Mulin Yu: yumulin@pjlab.org.cn
-
-## Citation
-
-If you find our work helpful, please consider citing:
+## 📝 Citation
 
 ```bibtex
-@inproceedings{scaffoldgs,
-  title={Scaffold-gs: Structured 3d gaussians for view-adaptive rendering},
-  author={Lu, Tao and Yu, Mulin and Xu, Linning and Xiangli, Yuanbo and Wang, Limin and Lin, Dahua and Dai, Bo},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={20654--20664},
-  year={2024}
+@inproceedings{xie2025scgc,
+  title     = {SCGC: Sparse Control-Guided Gaussian Splatting with Contrastive Learning},
+  author    = {Xie, Hongtao and Zhang, Hui},
+  booktitle = {Proceedings of the 20th ACM SIGGRAPH International Conference on Virtual-Reality Continuum and its Applications in Industry (VRCAI '25)},
+  year      = {2025},
+  address   = {Macau, China},
+  publisher = {ACM},
+  doi       = {10.1145/3779232.3779453}
 }
 ```
 
-## LICENSE
+## ⚖️ License
 
-Please follow the LICENSE of [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting).
-
-## Acknowledgement
-
-We thank all authors from [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting) for presenting such an excellent work.
+The code inherits the [Gaussian-Splatting License](LICENSE.md) (Inria & MPII) from 3D Gaussian Splatting and Scaffold-GS: **research and evaluation use only, no commercial use**. The datasets keep their own licences.

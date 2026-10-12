@@ -16,3 +16,4 @@ tensorboard_3d
 screenshots
 *.so
 jobs
+results/figures/*.mp4

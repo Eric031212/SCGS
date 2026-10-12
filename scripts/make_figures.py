@@ -99,9 +99,9 @@ def blender_delta(deltas):
     fig, ax = plt.subplots(figsize=(6.4, 2.8))
     ax.bar(scenes, m, width=0.55, color=C_OURS, yerr=e, capsize=3, ecolor=INK2, error_kw={"lw": 1})
     ax.axhline(0, color=INK, lw=0.8)
-    for i, v in enumerate(m):
-        ax.annotate(f"{v:+.2f}", (i, v), xytext=(0, 4 if v >= 0 else -11), textcoords="offset points",
-                    ha="center", fontsize=8, color=INK)
+    for i, (v, err) in enumerate(zip(m, e)):   # label beyond the error bar so they never collide
+        ax.annotate(f"{v:+.2f}", (i, v + err if v >= 0 else v - err), xytext=(0, 3 if v >= 0 else -10),
+                    textcoords="offset points", ha="center", fontsize=8, color=INK)
     n = len(deltas[scenes[0]]["PSNR"])
     ax.set_ylabel("ΔPSNR (dB)")
     ax.set_title(f"SCGC − Scaffold-GS on NeRF-Synthetic (mean ± std over {n} paired seeds)", color=INK, fontsize=9.5, loc="left")
@@ -188,7 +188,7 @@ def control_points(dataset, scene):
     fig = plt.figure(figsize=(9.5, 4.2))
     for i, (elev, azim) in enumerate([(20, 45), (60, 135)]):
         ax = fig.add_subplot(1, 2, i + 1, projection="3d")
-        ax.scatter(*anchors.T, s=0.2, c="#b8b7b1", alpha=0.35, linewidths=0)
+        ax.scatter(*anchors.T, s=0.6, c="#8f8e88", alpha=0.5, linewidths=0)
         sc = ax.scatter(*p1.T, s=9, c=disp, cmap="viridis", linewidths=0.3, edgecolors="white")
         ax.view_init(elev, azim)
         ax.set_axis_off()
@@ -201,20 +201,23 @@ def control_points(dataset, scene):
 
 
 def main():
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else "all"   # all | blender
     os.makedirs(FIG, exist_ok=True)
     d = index(load_runs())
     df = os.path.join(ROOT, "results", "blender_deltas.json")
     if os.path.exists(df):
         blender_delta(json.load(open(df)))
-    real_psnr(d)
-    ablations(d)
     for s in BLENDER:
         compare("nerf_synthetic", s)
+    for s in ["lego", "materials", "drums", "ship"]:
+        control_points("nerf_synthetic", s)
+    if only == "blender":
+        return
+    real_psnr(d)
+    ablations(d)
     for ds, ss in REAL.items():
         for s in ss:
             compare(ds, s)
-    for s in ["lego", "materials", "drums", "ship"]:
-        control_points("nerf_synthetic", s)
     for s in ["bicycle", "garden", "room"]:
         control_points("mipnerf360", s)
     print("figures ->", FIG, sorted(os.listdir(FIG)))
