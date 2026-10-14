@@ -119,7 +119,7 @@ Quantitatively, SCGC is on par with Scaffold-GS in this re-run: 33.40 vs. 33.43 
 Tested on Ubuntu 24.04, Python 3.10, PyTorch 2.1.2 + CUDA 12.1, GTX 1080 Ti / RTX 2080 Ti / Titan RTX.
 
 ```bash
-git clone https://github.com/Eric031212/SCGS.git && cd SCGS
+git clone https://github.com/Eric031212/SCGC.git && cd SCGC
 bash scripts/setup_env.sh          # conda env `scgc` + CUDA rasterizer (see build_ext.sh for compiler notes)
 conda activate scgc
 bash scripts/download_data.sh      # NeRF-Synthetic  -> data/nerf_synthetic
